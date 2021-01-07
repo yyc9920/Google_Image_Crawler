@@ -40,11 +40,11 @@ class ImageCrawler:
                 return 0
         last_height = new_height
     
-    @Slot()
-    def crawl(self, content, queue, number):
+    # @Slot()
+    def crawl(self, content, queue, queue_logfile, number):
         self.worker_configurer(queue)
-        extra = {'moduleName' : 'ImageCrawler'}
-        logging.log(logging.INFO, "Search " + content + " in Google for Image Crawling", extra=extra)
+        self.worker_configurer(queue_logfile)
+        logging.info(f"Search " + content + " in Google for Image Crawling")
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
         driver = webdriver.Chrome(".\\chromedriver.exe", options=options)
@@ -54,16 +54,23 @@ class ImageCrawler:
         elem.send_keys(Keys.RETURN)
         last_height = driver.execute_script("return document.body.scrollHeight")
 
-        os.mkdir('.\\images\\' + content)
+        try:
+            os.makedirs('.\\images\\' + content)
+        except Exception as e:
+            print("The Images of " + content + " has been already crawled and downlaoded")
+            logging.warning(f"The Images of " + content + " has been already crawled and downlaoded")
+            logging.warning(f"Please search for other contents or erase the " + content + " folder and retry crawling")
+            driver.close()
+            return False
         images = driver.find_elements_by_css_selector(".rg_i.Q4LuWd")
         while (len(images) < int(number)):
             self.scroll_down(driver, last_height)
             images = driver.find_elements_by_css_selector(".rg_i.Q4LuWd")
         count = 1
         for i, image in enumerate(images):
-            if (len(images) < i):
+            if (int(number) < i):
                 break
-            logging.log(logging.INFO, "Download Image of " + content + " no. " + str(count), extra=extra)
+            logging.info(f"Download Image of " + content + " no. " + str(count))
             try:
                 image.click()
                 time.sleep(5)
@@ -75,7 +82,7 @@ class ImageCrawler:
             except:
                 pass
         driver.close()
-        logging.log(logging.INFO, "Crawling " + content + " is Done!!", extra=extra)
+        logging.info(f"Crawling " + content + " is Done!!")
 
 if __name__=='__main__':
     crawler = ImageCrawler()

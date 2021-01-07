@@ -1,3 +1,5 @@
-Images/*
+Images/
 
-log/*
+log/
+
+__pycache__/

@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QThread
 import sys
 from listener import listener_process
+from listener_logfile import listener_logfile_process
 from PyQt5.Qt import QIntValidator
 
 window = uic.loadUiType(".\\gic.ui")[0]
@@ -41,16 +42,21 @@ class Consumer(QThread):
 class MainWindow(QMainWindow, window):
     def __init__(self):
         super().__init__()
-        self.queue = Queue(-1)
+        self.viewer_queue = Queue(-1)
         self.listener = Process(
-            target=listener_process, args=(self.queue, ))
+            target=listener_process, args=(self.viewer_queue, ))
         self.listener.start()
 
-        self.root_configurer(self.queue)
+        self.file_queue = Queue(-1)
+        self.listener_logfile = Process(
+            target=listener_logfile_process, args=(self.file_queue, ))
+        self.listener_logfile.start()
+
+        self.root_configurer(self.viewer_queue)
 
         self.setupUi(self)
         self.plainTextEdit.setReadOnly(True)
-        self.consumer = Consumer(self.queue)
+        self.consumer = Consumer(self.viewer_queue)
         self.consumer.poped.connect(self.print_data)
         self.consumer.start()
 
@@ -64,11 +70,15 @@ class MainWindow(QMainWindow, window):
         root.setLevel(logging.DEBUG)
 
     def crawling(self):
-        content = self.lineEdit.text()
+        if self.lineEdit.text() is "":
+            logging.warning(f"Please enter the content your looking for")
+            return False
+        if self.lineEdit_2.text() is "":
+            logging.warning(f"Please enter the number of images to crawl")
+            return False
         self.imagecrawler = ImageCrawler()
-        print(content)
         p = Process(name="crawler",
-            target=self.imagecrawler.crawl, args=(content, self.queue, self.lineEdit_2.text(), ))
+            target=self.imagecrawler.crawl, args=(self.lineEdit.text(), self.viewer_queue, self.file_queue, self.lineEdit_2.text(), ))
         p.start()
 
     @Slot(str)
