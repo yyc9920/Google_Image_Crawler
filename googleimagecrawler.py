@@ -44,7 +44,7 @@ class ImageCrawler:
     def crawl(self, content, queue, queue_logfile, number):
         self.worker_configurer(queue)
         self.worker_configurer(queue_logfile)
-        logging.info(f"Search " + content + " in Google for Image Crawling")
+        logging.info(f"Search " + '"' + content + '"' + " in Google for Image Crawling")
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
         driver = webdriver.Chrome(".\\chromedriver.exe", options=options)
@@ -66,19 +66,17 @@ class ImageCrawler:
         while (len(images) < int(number)):
             self.scroll_down(driver, last_height)
             images = driver.find_elements_by_css_selector(".rg_i.Q4LuWd")
-        count = 1
         for i, image in enumerate(images):
-            if (int(number) < i):
+            if (int(number) == i):
                 break
-            logging.info(f"Download Image of " + content + " no. " + str(count))
+            logging.info(f"Download Image of " + content + " no. " + str(i+1))
             try:
                 image.click()
                 time.sleep(5)
                 imgUrl = driver.find_element_by_xpath(
                     '/html/body/div[2]/c-wiz/div[3]/div[2]/div[3]/div/div/div[3]/div[2]/c-wiz/div[1]/div[1]/div/div[2]/a/img').get_attribute("src")
-                wget.download(imgUrl, '.\\images\\' + content + "\\" + str(count) + ".jpg")
-                time.sleep(3)
-                count = count + 1
+                wget.download(imgUrl, '.\\images\\' + content + "\\" + str(i+1) + ".jpg")
+                time.sleep(4)
             except:
                 pass
         driver.close()
