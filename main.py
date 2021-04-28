@@ -36,7 +36,7 @@ class Consumer(QThread):
             if not self.q.empty():
                 data = self.q.get()
                 formatter = logging.Formatter(
-                    '%(asctime)s %(processName)-10s %(name)s %(levelname)-8s %(message)s')
+                    '%(message)s')
                 self.poped.emit(str(formatter.format(data)))
 
 class MainWindow(QMainWindow, window):

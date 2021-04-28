@@ -10,7 +10,7 @@ def listener_configurer():
     root.setLevel(logging.DEBUG)
     console_handler = logging.StreamHandler()
     formatter = logging.Formatter(
-        '%(asctime)s %(processName)-10s %(name)s %(levelname)-8s %(message)s')
+        '%(message)s')
     console_handler.setFormatter(formatter)
     root.addHandler(console_handler)
 

@@ -62,10 +62,12 @@ class ImageCrawler:
             logging.warning(f"Please search for other contents or erase the " + content + " folder and retry crawling")
             driver.close()
             return False
+
         images = driver.find_elements_by_css_selector(".rg_i.Q4LuWd")
         while (len(images) < int(number)):
             self.scroll_down(driver, last_height)
             images = driver.find_elements_by_css_selector(".rg_i.Q4LuWd")
+
         for i, image in enumerate(images):
             if (int(number) == i):
                 break
@@ -79,6 +81,7 @@ class ImageCrawler:
                 time.sleep(4)
             except:
                 pass
+
         driver.close()
         logging.info(f"Crawling " + content + " is Done!!")
 
